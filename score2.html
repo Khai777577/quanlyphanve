@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>SCORE2 & SCORE2-OP - Phác đồ điều trị Tim mạch</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f4f8; padding: 15px; }
+        .container { max-width: 950px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        h2 { color: #d32f2f; text-align: center; text-transform: uppercase; margin-bottom: 5px; }
+        .sub-title { text-align: center; color: #666; margin-bottom: 20px; font-style: italic; }
+        .grid-input { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+        .input-box { background: #f9f9f9; padding: 12px; border-radius: 8px; border: 1px solid #ddd; }
+        label { font-weight: bold; display: block; margin-bottom: 5px; color: #333; }
+        select, input { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 15px; }
+        .btn-calc { background: #d32f2f; color: white; border: none; padding: 15px; width: 100%; cursor: pointer; font-weight: bold; border-radius: 8px; font-size: 18px; margin-top: 20px; }
+        
+        #resultArea { margin-top: 25px; display: none; }
+        .risk-header { padding: 15px; border-radius: 10px; text-align: center; color: white; margin-bottom: 20px; }
+        .low { background: #2e7d32; } .mod { background: #ef6c00; } .high { background: #c62828; }
+
+        .treatment-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .treatment-card { background: #fff; border: 1px solid #eee; padding: 15px; border-radius: 10px; border-top: 4px solid #d32f2f; }
+        .treatment-card h4 { color: #d32f2f; margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+        ul { padding-left: 18px; font-size: 14px; margin: 8px 0; }
+        li { margin-bottom: 5px; }
+        .highlight { color: #d32f2f; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>DỰ BÁO NGUY CƠ & PHÁC ĐỒ ĐIỀU TRỊ</h2>
+    <div class="sub-title">Khoa Nội Tim mạch - Lão học | BVĐK Đầm Dơi</div>
+
+    <div class="grid-input">
+        <div class="input-box"><label>Tuổi:</label><input type="number" id="age" placeholder="40-89"></div>
+        <div class="input-box"><label>Giới tính:</label><select id="gender"><option value="male">Nam</option><option value="female">Nữ</option></select></div>
+        <div class="input-box"><label>HA tâm thu (mmHg):</label><input type="number" id="sbp"></div>
+        <div class="input-box"><label>Non-HDL (mmol/L):</label><input type="number" id="nonHdl" step="0.1"></div>
+        <div class="input-box"><label>Hút thuốc:</label><select id="smoker"><option value="0">Không</option><option value="1">Có</option></select></div>
+        <div class="input-box"><label>Đái tháo đường:</label><select id="diabetes"><option value="0">Không</option><option value="1">Có</option></select></div>
+    </div>
+
+    <button class="btn-calc" onclick="calculate()">PHÂN TÍCH ĐIỀU TRỊ</button>
+
+    <div id="resultArea">
+        <div id="riskHeader" class="risk-header">
+            <h3 id="riskLabel"></h3>
+            <div id="riskValue" style="font-size: 30px; font-weight: bold;"></div>
+        </div>
+
+        <div class="treatment-grid">
+            <div class="treatment-card">
+                <h4>🍎 Thay đổi lối sống (DASH)</h4>
+                <ul>
+                    <li><b>Muối:</b> Giảm < 5g/ngày (tránh mắm, muối vừng).</li>
+                    <li><b>Rau quả:</b> Ăn 4-5 phần rau xanh/ngày (~400g).</li>
+                    <li><b>Vận động:</b> Đi bộ nhanh hoặc đạp xe 30-60 phút/ngày.</li>
+                    <li><b>Cân nặng:</b> Mục tiêu vòng bụng < 90cm (Nam), < 80cm (Nữ).</li>
+                    <li><b>Rượu bia:</b> Tối đa 2 đơn vị cồn/ngày (Nam), 1 đơn vị (Nữ).</li>
+                </ul>
+            </div>
+
+            <div class="treatment-card">
+                <h4>🎯 Mục tiêu con số</h4>
+                <ul id="targetList"></ul>
+            </div>
+
+            <div class="treatment-card">
+                <h4>💊 Hướng dẫn thuốc (Gợi ý)</h4>
+                <ul id="medList"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function calculate() {
+        const age = parseInt(document.getElementById('age').value);
+        const sbp = parseInt(document.getElementById('sbp').value);
+        const nonHdl = parseFloat(document.getElementById('nonHdl').value);
+        const isSmoker = document.getElementById('smoker').value === "1";
+        const hasDiabetes = document.getElementById('diabetes').value === "1";
+
+        if (!age || !sbp || !nonHdl) { alert("Nhập đủ thông tin bác sĩ ơi!"); return; }
+
+        // Tính điểm mô phỏng
+        let score = (age < 70) ? (sbp > 140 ? 8 : 4) : (sbp > 140 ? 16 : 10);
+        if (isSmoker) score += 5;
+        if (hasDiabetes) score += 6;
+        if (nonHdl > 4.8) score += 3;
+
+        const header = document.getElementById('riskHeader');
+        const label = document.getElementById('riskLabel');
+        const val = document.getElementById('riskValue');
+        const targets = document.getElementById('targetList');
+        const meds = document.getElementById('medList');
+
+        document.getElementById('resultArea').style.display = "block";
+        val.innerText = score + "%";
+
+        let threshold = (age < 50) ? [2.5, 7.5] : (age < 70 ? [5, 10] : [7.5, 15]);
+        
+        if (score < threshold[0]) {
+            header.className = "risk-header low"; label.innerText = "NGUY CƠ THẤP - TRUNG BÌNH";
+            setTargets(targets, meds, "2.6", "Chưa cần Statin", "Kiểm soát lối sống");
+        } else if (score < threshold[1]) {
+            header.className = "risk-header mod"; label.innerText = "NGUY CƠ CAO";
+            setTargets(targets, meds, "1.8", "Statin cường độ trung bình", "Atorvastatin 10-20mg / Rosuvastatin 5-10mg");
+        } else {
+            header.className = "risk-header high"; label.innerText = "NGUY CƠ RẤT CAO";
+            setTargets(targets, meds, "1.4", "Statin cường độ CAO", "Atorvastatin 40-80mg / Rosuvastatin 20-40mg");
+        }
+    }
+
+    function setTargets(tElem, mElem, ldl, statinLevel, medSuggest) {
+        const hasDb = document.getElementById('diabetes').value === "1";
+        tElem.innerHTML = `
+            <li><b>Huyết áp:</b> < 130/80 mmHg.</li>
+            <li><b>LDL-C:</b> < span class="highlight">${ldl} mmol/L</span>.</li>
+            <li><b>Non-HDL:</b> < ${parseFloat(ldl) + 0.8} mmol/L.</li>
+            ${hasDb ? "<li><b>HbA1c:</b> < 7.0%.</li>" : ""}
+        `;
+        mElem.innerHTML = `
+            <li><b>Lipid:</b> ${statinLevel}.</li>
+            <li><b>Ưu tiên:</b> ${medSuggest}.</li>
+            <li><b>Hạ áp:</b> Ưu tiên ACEi hoặc ARB (đặc biệt nếu có ĐTĐ).</li>
+            <li><b>Tiểu cầu:</b> Aspirin 75-100mg (nếu đã có biến cố mạch máu).</li>
+        `;
+    }
+</script>
+
+</body>
+</html>
