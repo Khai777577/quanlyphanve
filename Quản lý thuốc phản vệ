@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý Phản vệ - Nội TM-LH</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2 { color: #d32f2f; text-align: center; }
+        .login-box { text-align: center; padding: 50px; }
+        input, select, textarea { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { background: #d32f2f; color: white; border: none; padding: 12px; width: 100%; cursor: pointer; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f8f8f8; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="loginArea" class="login-box">
+        <h2>ĐĂNG NHẬP HỆ THỐNG</h2>
+        <input type="password" id="passInput" placeholder="Nhập mật khẩu của khoa...">
+        <button onclick="checkLogin()">VÀO HỆ THỐNG</button>
+    </div>
+
+    <div id="mainContent" class="hidden">
+        <h2>QUẢN LÝ BỆNH NHÂN PHẢN VỆ</h2>
+        <p style="text-align: center; font-style: italic;">Khoa Nội Tim mạch - Lão học - BVĐK Đầm Dơi</p>
+        
+        <div style="background: #fff3f3; padding: 15px; border-left: 5px solid #d32f2f;">
+            <h4>Tìm kiếm nhanh</h4>
+            <input type="text" id="searchBox" onkeyup="searchData()" placeholder="Nhập tên bệnh nhân hoặc tên thuốc...">
+        </div>
+
+        <table id="patientTable">
+            <thead>
+                <tr>
+                    <th>Họ tên</th>
+                    <th>Tuổi</th>
+                    <th>Thuốc gây phản vệ</th>
+                    <th>Mức độ</th>
+                    <th>Triệu chứng</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <tr>
+                    <td>Nguyễn Văn A</td>
+                    <td>75</td>
+                    <td>Ceftriaxone</td>
+                    <td>Độ II</td>
+                    <td>Mày đay, khó thở nhẹ</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div style="margin-top: 30px;">
+            <button onclick="window.open('LINK_GOOGLE_FORM_CUA_BAC_SI')">NHẬP CA MỚI</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const MATCH_PASS = "123456"; // Bác sĩ đổi mật khẩu ở đây
+
+    function checkLogin() {
+        const pass = document.getElementById('passInput').value;
+        if (pass === MATCH_PASS) {
+            document.getElementById('loginArea').classList.add('hidden');
+            document.getElementById('mainContent').classList.remove('hidden');
+        } else {
+            alert("Mật khẩu không đúng!");
+        }
+    }
+
+    function searchData() {
+        let input = document.getElementById('searchBox').value.toUpperCase();
+        let table = document.getElementById('patientTable');
+        let tr = table.getElementsByTagName('tr');
+
+        for (let i = 1; i < tr.length; i++) {
+            let tdName = tr[i].getElementsByTagName('td')[0];
+            let tdDrug = tr[i].getElementsByTagName('td')[2];
+            if (tdName || tdDrug) {
+                let txtName = tdName.textContent || tdName.innerText;
+                let txtDrug = tdDrug.textContent || tdDrug.innerText;
+                if (txtName.toUpperCase().indexOf(input) > -1 || txtDrug.toUpperCase().indexOf(input) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+</script>
+
+</body>
+</html>
