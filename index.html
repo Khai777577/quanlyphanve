@@ -2,25 +2,29 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Quản lý Phản vệ - Bệnh Viện Đa Khoa Đầm Dơi</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Phản vệ - BVĐK Đầm Dơi</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        h2 { color: #d32f2f; text-align: center; margin-bottom: 5px; }
-        .login-box { text-align: center; padding: 50px; }
-        input, select, textarea { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        button { background: #d32f2f; color: white; border: none; padding: 12px; width: 100%; cursor: pointer; font-weight: bold; border-radius: 5px; }
-        button:hover { background: #b71c1c; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
+        .container { max-width: 1100px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { color: #d32f2f; text-align: center; margin-bottom: 5px; text-transform: uppercase; }
+        .login-box { text-align: center; padding: 60px 20px; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+        button { background: #d32f2f; color: white; border: none; padding: 14px; width: 100%; cursor: pointer; font-weight: bold; border-radius: 6px; font-size: 16px; transition: 0.3s; }
+        button:hover { background: #b71c1c; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .search-container { background: #fff3f3; padding: 15px; border-left: 5px solid #d32f2f; margin: 20px 0; border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
         th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background-color: #d32f2f; color: white; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
+        th { background-color: #d32f2f; color: white; position: sticky; top: 0; }
+        tr:nth-child(even) { background-color: #fefefe; }
+        tr:hover { background-color: #f1f1f1; }
         .hidden { display: none; }
-        .badge { padding: 5px 10px; border-radius: 15px; color: white; font-weight: bold; font-size: 12px; }
+        .badge { padding: 4px 10px; border-radius: 12px; color: white; font-weight: bold; font-size: 12px; display: inline-block; }
         .do1 { background-color: #ffc107; color: black; } /* Nhẹ */
         .do2 { background-color: #fb8c00; } /* Nặng */
         .do3 { background-color: #e53935; } /* Nguy kịch */
         .do4 { background-color: #000000; } /* Ngừng tuần hoàn */
+        .loading { text-align: center; padding: 20px; font-style: italic; color: #666; }
     </style>
 </head>
 <body>
@@ -29,72 +33,107 @@
     <div id="loginArea" class="login-box">
         <h2>HỆ THỐNG QUẢN LÝ PHẢN VỆ</h2>
         <p>Bệnh Viện Đa Khoa Đầm Dơi</p>
-        <input type="password" id="passInput" placeholder="Nhập mật khẩu khoa...">
-        <button onclick="checkLogin()">VÀO HỆ THỐNG</button>
+        <div style="max-width: 400px; margin: auto;">
+            <input type="password" id="passInput" placeholder="Nhập mật khẩu khoa..." onkeypress="if(event.keyCode==13) checkLogin()">
+            <button onclick="checkLogin()">VÀO HỆ THỐNG</button>
+        </div>
     </div>
 
     <div id="mainContent" class="hidden">
         <h2>DANH SÁCH BỆNH NHÂN PHẢN VỆ</h2>
-        <p style="text-align: center; font-style: italic;">BVĐK Đầm Dơi - Cập nhật dữ liệu lâm sàng</p>
+        <p style="text-align: center; font-style: italic;">Dữ liệu trực tuyến từ Khoa Nội - Tim mạch - Lão học</p>
         
-        <div style="background: #fff3f3; padding: 15px; border-left: 5px solid #d32f2f; margin-top: 20px;">
-            <h4 style="margin: 0 0 10px 0;">Bộ lọc tra cứu</h4>
-            <input type="text" id="searchBox" onkeyup="searchData()" placeholder="Tìm theo tên BN, địa chỉ hoặc loại thuốc...">
+        <div class="search-container">
+            <label style="font-weight: bold;">Tra cứu nhanh:</label>
+            <input type="text" id="searchBox" onkeyup="searchData()" placeholder="Nhập tên BN, loại thuốc hoặc mức độ độ...">
         </div>
 
-        <div style="overflow-x: auto;">
+        <div style="overflow-x: auto; max-height: 600px;">
             <table id="patientTable">
                 <thead>
                     <tr>
+                        <th>Thời gian</th>
                         <th>Họ tên</th>
                         <th>Tuổi</th>
                         <th>Địa chỉ</th>
-                        <th>Thuốc gây phản vệ</th>
+                        <th>Thuốc gây PV</th>
                         <th>Mức độ</th>
                         <th>Triệu chứng chính</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
-                    <tr>
-                        <td>Nguyễn Văn An</td>
-                        <td>75</td>
-                        <td>TT. Đầm Dơi, Đầm Dơi, Cà Mau</td>
-                        <td>Ceftriaxone</td>
-                        <td><span class="badge do2">Độ II</span></td>
-                        <td>Mày đay, ngứa, khó thở nhẹ</td>
-                    </tr>
-                    <tr>
-                        <td>Trần Thị B</td>
-                        <td>62</td>
-                        <td>Xã Tân Thuận, Đầm Dơi</td>
-                        <td>Lidocaine</td>
-                        <td><span class="badge do3">Độ III</span></td>
-                        <td>Vã mồ hôi, tụt huyết áp, mất ý thức</td>
-                    </tr>
                     </tbody>
             </table>
         </div>
         
         <div style="margin-top: 30px; display: flex; gap: 10px;">
-            <button style="flex: 1;" onclick="window.open('https://docs.google.com/forms/d/1dG72ywr0Suvt4vvHpHNdXbOQvs6TZjxwGDmImCMSGVs/edit#responses')">NHẬP CA MỚI (FORM)</button>
-            <button style="flex: 1; background: #555;" onclick="location.reload()">LÀM MỚI TRANG</button>
+            <button style="flex: 2;" onclick="window.open('https://docs.google.com/forms/d/1dG72ywr0Suvt4vvHpHNdXbOQvs6TZjxwGDmImCMSGVs/viewform')">NHẬP CA MỚI (GOOGLE FORM)</button>
+            <button style="flex: 1; background: #555;" onclick="loadDataFromSheet()">CẬP NHẬT DỮ LIỆU</button>
         </div>
     </div>
 </div>
 
 <script>
-    const MATCH_PASS = "1234567"; // Bác sĩ có thể đổi mật khẩu tại đây
+    const MATCH_PASS = "1234567"; 
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTxpJvVWjX_vbKrAeLfz_w7-vX_AXeyRbB13IgsYv9kfO6Z69Ve8O4tY8e7y9mO-i1cNQwuihzTGvvJ/pub?output=csv";
 
+    // Hàm kiểm tra đăng nhập
     function checkLogin() {
         const pass = document.getElementById('passInput').value;
         if (pass === MATCH_PASS) {
             document.getElementById('loginArea').classList.add('hidden');
             document.getElementById('mainContent').classList.remove('hidden');
+            loadDataFromSheet(); // Tải dữ liệu ngay khi vào
         } else {
             alert("Mật khẩu không đúng!");
         }
     }
 
+    // Hàm tải dữ liệu từ Google Sheet (CSV)
+    async function loadDataFromSheet() {
+        const tableBody = document.getElementById('tableBody');
+        tableBody.innerHTML = '<tr><td colspan="7" class="loading">Đang kết nối dữ liệu Google Sheet...</td></tr>';
+
+        try {
+            const response = await fetch(CSV_URL);
+            const data = await response.text();
+            
+            // Tách các dòng, bỏ dòng tiêu đề đầu tiên
+            const rows = data.split("\n").slice(1); 
+            let html = '';
+
+            rows.forEach(row => {
+                // Regex để tách cột CSV chính xác (xử lý dấu phẩy trong ngoặc kép)
+                const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                
+                if (cols.length >= 6) {
+                    // Cấu trúc cột giả định: [0]Timestamp, [1]Họ tên, [2]Tuổi, [3]Địa chỉ, [4]Thuốc, [5]Mức độ, [6]Triệu chứng
+                    let mucDo = cols[5] ? cols[5].trim() : "";
+                    let doClass = "do1";
+                    if (mucDo.includes("II")) doClass = "do2";
+                    else if (mucDo.includes("III")) doClass = "do3";
+                    else if (mucDo.includes("IV") || mucDo.includes("ngừng")) doClass = "do4";
+
+                    html += `<tr>
+                        <td style="font-size:12px; color:#666;">${cols[0].split(' ')[0]}</td>
+                        <td style="font-weight:bold;">${cols[1].replace(/"/g, "")}</td>
+                        <td>${cols[2]}</td>
+                        <td>${cols[3].replace(/"/g, "")}</td>
+                        <td style="color:#d32f2f; font-weight:500;">${cols[4].replace(/"/g, "")}</td>
+                        <td><span class="badge ${doClass}">${mucDo.replace(/"/g, "")}</span></td>
+                        <td>${cols[6] ? cols[6].replace(/"/g, "") : ""}</td>
+                    </tr>`;
+                }
+            });
+
+            tableBody.innerHTML = html || '<tr><td colspan="7" style="text-align:center;">Chưa có dữ liệu nào được ghi nhận.</td></tr>';
+        } catch (error) {
+            tableBody.innerHTML = '<tr><td colspan="7" style="color:red; text-align:center;">Lỗi tải dữ liệu. Bác sĩ hãy kiểm tra lại kết nối Internet!</td></tr>';
+            console.error(error);
+        }
+    }
+
+    // Hàm tìm kiếm
     function searchData() {
         let input = document.getElementById('searchBox').value.toUpperCase();
         let table = document.getElementById('patientTable');
@@ -102,11 +141,7 @@
 
         for (let i = 1; i < tr.length; i++) {
             let rowText = tr[i].innerText.toUpperCase();
-            if (rowText.indexOf(input) > -1) {
-                tr[i].style.display = "";
-            } else {
-                tr[i].style.display = "none";
-            }
+            tr[i].style.display = (rowText.indexOf(input) > -1) ? "" : "none";
         }
     }
 </script>
